@@ -34,19 +34,24 @@ export default function ShopToolbar() {
   };
 
   // Instant search as user types (debounced)
-  const onSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const nextQ = e.target.value;
-    setQ(nextQ);
+ const onCategoryChange = (e: ChangeEvent<HTMLSelectElement>) => {
+  const nextCategory = e.target.value;
 
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
-      pushFilters(nextQ, category);
-    }, 250);
-  };
+  // Cancel any pending search before changing destination.
+  if (debounceRef.current) {
+    clearTimeout(debounceRef.current);
+    debounceRef.current = null;
+  }
 
-  const onCategoryChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    const nextCategory = e.target.value;
-    setCategory(nextCategory);
+  if (nextCategory === "subscription") {
+    router.push("/subscription");
+    return;
+  }
+
+  setCategory(nextCategory);
+  setQ("");
+  pushFilters("", nextCategory);
+};
 
     // Your requested behavior:
     // - picking any category clears old search

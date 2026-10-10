@@ -5,11 +5,12 @@ import { useEffect, useRef, useState } from "react";
 
 const items = [
   { label: "Home", href: "/", icon: "⌂" },
-  { label: "Farm Box", href: "/shop?category=subscription", icon: "🥬" },
+  { label: "Subscriptions", href: "/subscription", icon: "📦" },
+  { label: "Farm Box", href: "/subscription?type=fruit-veg", icon: "🥬" },
   { label: "Shop All", href: "/shop", icon: "🛒" },
   { label: "Baby", href: "/shop?category=baby", icon: "🍼" },
   { label: "Beauty", href: "/shop?category=beauty", icon: "✨" },
-  { label: "Wellness", href: "/shop?category=wellness", icon: "🌿" },
+  { label: "Wellness", href: "/subscription?type=wellness", icon: "🌿" },
 ];
 
 export default function CategoryGrid() {
@@ -59,7 +60,7 @@ export default function CategoryGrid() {
         className="fixed inset-x-0 bottom-0 z-50 border-t border-[#dbe7c5] bg-white shadow-[0_-4px_16px_rgba(0,0,0,0.08)]"
         style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
       >
-        <ul className="mx-auto grid h-16 w-full max-w-6xl grid-cols-6">
+        <ul className="mx-auto grid h-16 w-full max-w-6xl grid-cols-7">
           {items.map((item) => (
             <li key={item.label} className="min-w-0">
               <Link

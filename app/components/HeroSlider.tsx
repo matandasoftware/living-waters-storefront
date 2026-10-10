@@ -7,17 +7,17 @@ import { useEffect, useState } from "react";
 const slides = [
   {
     title: "Farm Subscription Box",
-    subtitle: "Explore our farm-fresh produce boxes.",
+    subtitle: "Choose a weekly seasonal, monthly seasonal, or customised box.",
     image: "/images/hero/slide-1.jpg",
-    cta: "Shop Farm Box",
-    href: "/shop?category=subscription",
+    cta: "Choose Your Box",
+    href: "/subscription?type=fruit-veg",
   },
   {
     title: "Wellness & Nutrition",
-    subtitle: "Explore our wellness collection.",
+    subtitle: "Choose a wellness subscription tailored to your preferences.",
     image: "/images/hero/slide-2.jpg",
-    cta: "Shop Wellness",
-    href: "/shop?category=wellness",
+    cta: "Choose Your Plan",
+    href: "/subscription?type=wellness",
   },
   {
     title: "Essentials for Your Family",

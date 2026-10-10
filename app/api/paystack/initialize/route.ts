@@ -1,11 +1,34 @@
 import { NextResponse } from "next/server";
+import {
+  PAYSTACK_PLAN_CODES,
+  PLAN_PRICING,
+  SubscriptionPlan,
+  SubscriptionType,
+} from "../../../components/subscriptions";
 
-type CartItem = {
-  slug: string;
-  name: string;
-  price: number;
-  quantity: number;
+type InitializeBody = {
+  email: string;
+  type: SubscriptionType;
+  plan: SubscriptionPlan;
+  metadata?: {
+    name?: string;
+    phone?: string;
+    address?: string;
+    notes?: string;
+    deliveryDay?: string;
+  };
 };
+
+const VALID_TYPES: SubscriptionType[] = ["fruit-veg", "wellness"];
+const VALID_PLANS: SubscriptionPlan[] = ["weekly-seasonal", "monthly-seasonal", "customise"];
+
+function isValidType(value: string): value is SubscriptionType {
+  return VALID_TYPES.includes(value as SubscriptionType);
+}
+
+function isValidPlan(value: string): value is SubscriptionPlan {
+  return VALID_PLANS.includes(value as SubscriptionPlan);
+}
 
 export async function POST(request: Request) {
   try {
@@ -19,26 +42,58 @@ export async function POST(request: Request) {
       );
     }
 
-    const body = await request.json();
-    const { email, amount, metadata } = body as {
-      email: string;
-      amount: number;
-      metadata?: {
-        name?: string;
-        phone?: string;
-        address?: string;
-        items?: CartItem[];
-      };
-    };
+    const body = (await request.json()) as InitializeBody;
+    const { email, metadata } = body;
+    const rawType = body.type;
+    const rawPlan = body.plan;
 
-    if (!email || !amount || amount <= 0) {
+    if (!email || !rawType || !rawPlan) {
       return NextResponse.json(
-        { message: "Email and valid amount are required" },
+        { message: "email, type and plan are required" },
         { status: 400 }
       );
     }
 
-    const amountInCents = Math.round(amount * 100);
+    if (!isValidType(rawType) || !isValidPlan(rawPlan)) {
+      return NextResponse.json(
+        { message: "Invalid subscription type or plan" },
+        { status: 400 }
+      );
+    }
+
+    const type = rawType;
+    const plan = rawPlan;
+
+    // Customise remains manual/quote flow
+    if (plan === "customise") {
+      return NextResponse.json(
+        { message: "Customise plan uses manual quote flow, not direct payment." },
+        { status: 400 }
+      );
+    }
+
+    // Server-authoritative pricing (DO NOT trust client amount)
+    const expectedAmountMinor = PLAN_PRICING[type][plan];
+    if (!expectedAmountMinor || expectedAmountMinor <= 0) {
+      return NextResponse.json(
+        { message: "Invalid configured amount for selected plan" },
+        { status: 500 }
+      );
+    }
+
+    // Plan code for recurring renewals
+    const planCode = PAYSTACK_PLAN_CODES[type][plan];
+    if (!planCode || planCode.startsWith("PLAN_")) {
+      return NextResponse.json(
+        {
+          message:
+            "Paystack plan code is not configured. Set real values in app/components/subscriptions.ts",
+        },
+        { status: 500 }
+      );
+    }
+
+    const callbackUrl = `${baseUrl}/checkout/success?flow=subscription`;
 
     const paystackRes = await fetch("https://api.paystack.co/transaction/initialize", {
       method: "POST",
@@ -48,10 +103,16 @@ export async function POST(request: Request) {
       },
       body: JSON.stringify({
         email,
-        amount: amountInCents,
+        amount: expectedAmountMinor, // already in minor units (kobo/cents)
         currency: "ZAR",
-        callback_url: `${baseUrl}/checkout/success`,
-        metadata: metadata ?? {},
+        plan: planCode, // attaches recurring plan
+        callback_url: callbackUrl,
+        metadata: {
+          kind: "subscription",
+          subscriptionType: type,
+          subscriptionPlan: plan,
+          ...metadata,
+        },
       }),
     });
 
