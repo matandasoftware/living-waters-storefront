@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+:root {
+    --background: #ffffff;
+    --foreground: #171717;
+    --olive-900: #3f5222;
+    --olive-800: #556b2f;
+    --olive-700: #6f8741;
+    --olive-200: #dbe7c5;
+    --olive-100: #edf4df;
+}
+
+html,
+body {
+    background: var(--background);
+    color: var(--foreground);
+}
+
+/* Optional helpers */
+.brand-bg {
+    background-color: var(--olive-800);
+}
+
+.brand-text {
+    color: var(--olive-800);
+}
+
+.brand-border {
+    border-color: var(--olive-200);
+}
+
+.brand-soft {
+    background-color: var(--olive-100);
+}
+
+/* Moving announcement bar */
+@keyframes marquee {
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(-50%);
+    }
+}
+
+.marquee-track {
+    animation: marquee 25s linear infinite;
+}
+
+    .marquee-track:hover {
+        animation-play-state: paused;
+    }
+
+@media (prefers-reduced-motion: reduce) {
+    .marquee-track {
+        animation: none;
+    }
+}
