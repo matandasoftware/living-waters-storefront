@@ -352,7 +352,7 @@ function SubscriptionForm({
           type="submit"
           className="rounded-md bg-[#556B2F] px-5 py-2.5 font-semibold text-white hover:bg-[#3f5222]"
         >
-          {amount === 0 ? "Send Custom Request" : "Proceed to Payment"}
+          Proceed to Payment
         </button>
       </form>
     </main>

@@ -20,7 +20,12 @@ type InitializeBody = {
 };
 
 const VALID_TYPES: SubscriptionType[] = ["fruit-veg", "wellness"];
-const VALID_PLANS: SubscriptionPlan[] = ["weekly-seasonal", "monthly-seasonal", "customise"];
+const VALID_PLANS: SubscriptionPlan[] = [
+  "weekly-seasonal",
+  "monthly-seasonal",
+  "custom-weekly",
+  "custom-monthly",
+];
 
 function isValidType(value: string): value is SubscriptionType {
   return VALID_TYPES.includes(value as SubscriptionType);
@@ -64,14 +69,6 @@ export async function POST(request: Request) {
     const type = rawType;
     const plan = rawPlan;
 
-    // Customise remains manual/quote flow
-    if (plan === "customise") {
-      return NextResponse.json(
-        { message: "Customise plan uses manual quote flow, not direct payment." },
-        { status: 400 }
-      );
-    }
-
     // Server-authoritative pricing (DO NOT trust client amount)
     const expectedAmountMinor = PLAN_PRICING[type][plan];
     if (!expectedAmountMinor || expectedAmountMinor <= 0) {
@@ -82,8 +79,8 @@ export async function POST(request: Request) {
     }
 
     // Plan code for recurring renewals
-    const planCode = PAYSTACK_PLAN_CODES[type][plan];
-    if (!planCode || planCode.startsWith("PLAN_")) {
+     const planCode = PAYSTACK_PLAN_CODES[type][plan];
+     if (!planCode || !planCode.startsWith("PLN_")) {
       return NextResponse.json(
         {
           message:
