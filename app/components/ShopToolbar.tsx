@@ -1,7 +1,8 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { ChangeEvent, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import type { ChangeEvent } from "react";
 
 const categories = ["all", "subscription", "baby", "beauty", "wellness"];
 
@@ -15,60 +16,81 @@ export default function ShopToolbar() {
   const [q, setQ] = useState(urlQ);
   const [category, setCategory] = useState(urlCategory);
 
-  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Keep local state synced with URL (important for back/forward nav)
+  function cancelPendingSearch() {
+    if (debounceRef.current !== null) {
+      clearTimeout(debounceRef.current);
+      debounceRef.current = null;
+    }
+  }
+
   useEffect(() => {
     setQ(urlQ);
     setCategory(urlCategory);
   }, [urlQ, urlCategory]);
 
-  const pushFilters = (nextQ: string, nextCategory: string) => {
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current !== null) {
+        clearTimeout(debounceRef.current);
+      }
+    };
+  }, []);
+
+  function pushFilters(nextQ: string, nextCategory: string) {
     const params = new URLSearchParams();
 
-    if (nextQ.trim()) params.set("q", nextQ.trim());
-    if (nextCategory !== "all") params.set("category", nextCategory);
+    if (nextQ.trim()) {
+      params.set("q", nextQ.trim());
+    }
+
+    if (nextCategory !== "all") {
+      params.set("category", nextCategory);
+    }
 
     const query = params.toString();
     router.replace(query ? `/shop?${query}` : "/shop");
-  };
-
-  // Instant search as user types (debounced)
- const onCategoryChange = (e: ChangeEvent<HTMLSelectElement>) => {
-  const nextCategory = e.target.value;
-
-  // Cancel any pending search before changing destination.
-  if (debounceRef.current) {
-    clearTimeout(debounceRef.current);
-    debounceRef.current = null;
   }
 
-  if (nextCategory === "subscription") {
-    router.push("/subscription");
-    return;
+  function onSearchChange(e: ChangeEvent<HTMLInputElement>) {
+    const nextQ = e.target.value;
+    setQ(nextQ);
+    cancelPendingSearch();
+
+    debounceRef.current = setTimeout(() => {
+      debounceRef.current = null;
+      pushFilters(nextQ, category);
+    }, 250);
   }
 
-  setCategory(nextCategory);
-  setQ("");
-  pushFilters("", nextCategory);
-};
+  function onCategoryChange(e: ChangeEvent<HTMLSelectElement>) {
+    const nextCategory = e.target.value;
+    cancelPendingSearch();
 
-    // Your requested behavior:
-    // - picking any category clears old search
-    // - picking "all" also clears search and shows all products
+    // Subscription opens both Farm Box and Wellness options.
+    if (nextCategory === "subscription") {
+      router.push("/subscription");
+      return;
+    }
+
+    // Other categories remain normal product filters.
+    setCategory(nextCategory);
     setQ("");
     pushFilters("", nextCategory);
-  };
+  }
 
-  const clearAll = () => {
+  function clearAll() {
+    cancelPendingSearch();
     setQ("");
     setCategory("all");
     router.replace("/shop");
-  };
+  }
 
   return (
     <div className="mt-5 grid gap-3 sm:grid-cols-[1fr_180px_auto]">
       <input
+        aria-label="Search products"
         value={q}
         onChange={onSearchChange}
         placeholder="Search products..."
@@ -76,13 +98,14 @@ export default function ShopToolbar() {
       />
 
       <select
+        aria-label="Filter by category"
         value={category}
         onChange={onCategoryChange}
         className="h-11 rounded-md border px-3 outline-none focus:ring-2 focus:ring-[#556B2F]"
       >
-        {categories.map((c) => (
-          <option key={c} value={c}>
-            {c[0].toUpperCase() + c.slice(1)}
+        {categories.map((item) => (
+          <option key={item} value={item}>
+            {item[0].toUpperCase() + item.slice(1)}
           </option>
         ))}
       </select>
