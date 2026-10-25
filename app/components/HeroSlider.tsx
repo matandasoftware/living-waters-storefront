@@ -6,25 +6,39 @@ import { useEffect, useState } from "react";
 
 const slides = [
   {
-    title: "Farm Subscription Box",
-    subtitle: "Choose a weekly seasonal, monthly seasonal, or customised box.",
-    image: "/images/hero/slide-1.jpg",
+    title: "Wellness That Fits Your Lifestyle",
+    subtitle: "Discover nourishing products that support your everyday health journey.",
+    image: "/images/hero/slide-1.jpeg",
+    cta: "Shop Wellness",
+    href: "/wellness",
+  },
+  {
+    title: "Healthy Choices for Every Family",
+    subtitle: "From pantry staples to fresh picks, bring wholesome options to your table.",
+    image: "/images/hero/slide-2.jpeg",
+    cta: "Shop Essentials",
+    href: "/shop",
+  },
+  {
+    title: "Fresh, Colorful, and Nutritious",
+    subtitle: "Explore food and wellness selections made to fuel your body.",
+    image: "/images/hero/slide-3.jpeg",
+    cta: "Explore Nutrition",
+    href: "/wellness",
+  },
+  {
+    title: "Living Waters Product Range",
+    subtitle: "Browse trusted herbs, spices, and wellness products from Living Waters.",
+    image: "/images/hero/slide-4.jpeg",
+    cta: "View Products",
+    href: "/shop",
+  },
+  {
+    title: "Gift and Subscription Boxes",
+    subtitle: "Order beautiful curated boxes for your home, gifts, or recurring wellness needs.",
+    image: "/images/hero/slide-5.jpeg",
     cta: "Choose Your Box",
     href: "/subscription?type=fruit-veg",
-  },
-  {
-    title: "Wellness & Nutrition",
-    subtitle: "Choose a wellness subscription tailored to your preferences.",
-    image: "/images/hero/slide-2.jpg",
-    cta: "Choose Your Plan",
-    href: "/subscription?type=wellness",
-  },
-  {
-    title: "Essentials for Your Family",
-    subtitle: "Browse baby, beauty, and everyday essentials.",
-    image: "/images/hero/slide-3.jpg",
-    cta: "Shop All",
-    href: "/shop",
   },
 ];
 
@@ -67,16 +81,15 @@ export default function HeroSlider() {
         aria-label={`${index + 1} of ${slides.length}`}
         className="grid items-center gap-4 rounded-2xl border border-[#dbe7c5] bg-white p-3 md:grid-cols-[3fr_2fr] md:p-4"
       >
-        <figure className="relative h-[190px] w-full overflow-hidden rounded-2xl sm:h-[240px] lg:h-[300px]">
+        <figure className="relative h-[220px] w-full overflow-hidden rounded-2xl sm:h-[280px] lg:h-[360px]">
           <Image
             key={current.image}
             src={current.image}
             alt={current.title}
             fill
-            unoptimized
-            loading="eager"
-            sizes="(min-width: 768px) 60vw, 100vw"
-            className="rounded-2xl object-cover"
+            priority
+            sizes="(min-width: 1024px) 66vw, (min-width: 768px) 60vw, 100vw"
+            className="rounded-2xl object-cover object-center"
           />
         </figure>
 

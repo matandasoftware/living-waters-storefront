@@ -1,0 +1,32 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Subscription {
+  id                   String   @id @default(cuid())
+  customerEmail        String
+  subscriptionCode     String   @unique
+  paystackCustomerCode String?
+  paystackEmailToken   String? // IMPORTANT for disable endpoint
+  planCode             String?
+  subscriptionType     String?
+  subscriptionPlan     String?
+  status               String   @default("active") // active, past_due, cancelled
+  nextBillingDate      DateTime?
+  lastPaymentReference String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+model WebhookEvent {
+  id        String   @id @default(cuid())
+  eventKey  String   @unique // dedupe key
+  eventType String
+  payload   Json
+  createdAt DateTime @default(now())
+}
